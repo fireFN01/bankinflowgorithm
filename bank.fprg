@@ -1,0 +1,114 @@
+<?xml version="1.0"?>
+<flowgorithm fileversion="4.2">
+    <attributes>
+        <attribute name="name" value="flow"/>
+        <attribute name="authors" value="fireFNdev"/>
+        <attribute name="about" value=""/>
+        <attribute name="saved" value="2026-09-19 05:45:00 "/>
+    </attributes>
+    <function name="Main" type="None" variable="">
+        <parameters/>
+        <body>
+            <comment text="Autenticazione a due fattori: Il programma richiede l'inserimento di una stringa (Numero Carta) e di un intero (PIN). Consente un massimo di 3 tentativi, dopodiché il sistema deve bloccarsi lanciando un messaggio di allarme.Gestione del Saldo e Limiti: Imposta un saldo iniziale. Quando l'utente preleva, il sistema deve verificare se i fondi sono sufficienti e se il prelievo non supera il limite massimo giornaliero (es. 500 euro).Menu Interattivo Continuo: Un ciclo principale che permette all'utente di effettuare più operazioni senza chiudere il programma (Preleva, Deposita, Visualizza Saldo, Cronologia, Esci).Array per la Cronologia (La parte più difficile): Utilizza un array di stringhe o di numeri per registrare le ultime 5 operazioni effettuate (es. &quot;+100&quot;, &quot;-50&quot;). Ogni volta che viene fatta un'operazione, devi &quot;shiftare&quot; (spostare) gli elementi dell'array per memorizzare l'ultimo movimento in cima."/>
+            <declare name="DATABASEEMAIL, DATABASENOME, DATABASECOGNOME, DATABASEPASSWORD, SITOEMAIL, SITONOME, SITOCOGNOME, SITOPASSWORD" type="String" array="False" size=""/>
+            <declare name="DEPOSITO, SOLDITOTALI, PRELIEVO, SCELTAMETODO, TENTATIVI" type="Integer" array="False" size=""/>
+            <declare name="BLOCCOSI, BLOCCONO, BLOCCORISPOSTA, ASSISTENZA" type="String" array="False" size=""/>
+            <declare name="AUTENTICATO" type="Boolean" array="False" size=""/>
+            <assign variable="BLOCCOSI" expression="&quot;si&quot;"/>
+            <assign variable="BLOCCONO" expression="&quot;no&quot;"/>
+            <assign variable="SOLDITOTALI" expression="100"/>
+            <assign variable="DATABASEEMAIL" expression="&quot;mariorossi@gmail.com&quot;"/>
+            <assign variable="DATABASENOME" expression="&quot;mario&quot;"/>
+            <assign variable="DATABASECOGNOME" expression="&quot;rossi&quot;"/>
+            <assign variable="DATABASEPASSWORD" expression="&quot;mariorossi&quot;"/>
+            <assign variable="TENTATIVI" expression="3"/>
+            <assign variable="AUTENTICATO" expression="False"/>
+            <while expression="(AUTENTICATO == False) &amp;&amp; (TENTATIVI &gt; 0)">
+                <output expression="&quot;Salve, la preghiamo di autentificarsi inserendo la sua email.&quot;" newline="True"/>
+                <input variable="SITOEMAIL"/>
+                <if expression="SITOEMAIL == DATABASEEMAIL">
+                    <then>
+                        <output expression="&quot;Perfetto ora la preghiamo di inserire la password&quot;" newline="True"/>
+                        <input variable="SITOPASSWORD"/>
+                        <if expression="SITOPASSWORD == DATABASEPASSWORD">
+                            <then>
+                                <assign variable="AUTENTICATO" expression="True"/>
+                            </then>
+                            <else>
+                                <assign variable="TENTATIVI" expression="TENTATIVI - 1"/>
+                                <output expression="&quot;Password ERRATA! Ti rimangono &quot; &amp; TENTATIVI &amp; &quot; tentativi.&quot;" newline="True"/>
+                            </else>
+                        </if>
+                    </then>
+                    <else>
+                        <assign variable="TENTATIVI" expression="TENTATIVI - 1"/>
+                        <output expression="&quot;Email ERRATA! Ti rimangono &quot; &amp; TENTATIVI &amp; &quot; tentativi.&quot;" newline="True"/>
+                    </else>
+                </if>
+            </while>
+            <if expression="AUTENTICATO == True">
+                <then>
+                    <output expression="&quot;GRAZIE PER ESSERTI AUTORIZZATO, purtoppò abbiamo riscontrato dei problemi di sicurezza perciò ti chiediamo di rispondere a due domande ovvero: COME TI CHIAMI? , QUALè IL TUO COGNOME?&quot;" newline="True"/>
+                    <input variable="SITONOME"/>
+                    <input variable="SITOCOGNOME"/>
+                    <if expression="(SITONOME == DATABASENOME) &amp;&amp; (SITOCOGNOME == DATABASECOGNOME)">
+                        <then>
+                            <output expression="&quot;PERFETTO &quot; &amp; DATABASENOME &amp; &quot; &quot; &amp; DATABASECOGNOME &amp; &quot; BENVENUTO&quot; &amp; ToChar(13) &amp; &quot;1. Schiaccia 1 se vuoi depositare soldi&quot; &amp; ToChar(13) &amp; &quot;2. Clicca 2 se vuoi prelevare soldi&quot; &amp; ToChar(13) &amp; &quot;3. Clicca 3 se vuoi bloccare il conto&quot; &amp; ToChar(13) &amp; &quot;4. Clicca 4 se vuoi chiamare l'assistenza&quot;" newline="True"/>
+                            <input variable="SCELTAMETODO"/>
+                            <if expression="SCELTAMETODO == 1">
+                                <then>
+                                    <output expression="&quot;Quanto desideri depositare?&quot;" newline="True"/>
+                                    <input variable="DEPOSITO"/>
+                                    <assign variable="SOLDITOTALI" expression="SOLDITOTALI + DEPOSITO"/>
+                                    <output expression="&quot;Perfetto grazie per aver depositato &quot; &amp; DEPOSITO &amp; &quot; sul tuo conto che ora ammonta ad &quot; &amp; SOLDITOTALI &amp; &quot; euro&quot;" newline="True"/>
+                                </then>
+                                <else>
+                                    <if expression="SCELTAMETODO == 2">
+                                        <then>
+                                            <output expression="&quot;Quanto desideri prelevare?&quot;" newline="True"/>
+                                            <input variable="PRELIEVO"/>
+                                            <assign variable="SOLDITOTALI" expression="SOLDITOTALI - PRELIEVO"/>
+                                            <output expression="&quot;Perfetto hai prelevato &quot; &amp; PRELIEVO &amp; &quot; sul tuo conto che ora ammonta ad &quot; &amp; SOLDITOTALI &amp; &quot; euro&quot;" newline="True"/>
+                                        </then>
+                                        <else>
+                                            <if expression="SCELTAMETODO == 3">
+                                                <then>
+                                                    <output expression="&quot;Desideri bloccare il tuo conto? scrivi si oppure no&quot;" newline="True"/>
+                                                    <input variable="BLOCCORISPOSTA"/>
+                                                    <if expression="BLOCCORISPOSTA == BLOCCOSI">
+                                                        <then>
+                                                            <output expression="&quot;IL TUO CONTO &quot; &amp; DATABASENOME &amp; &quot; &quot; &amp; DATABASECOGNOME &amp; &quot; è STATO BLOCCATO&quot;" newline="True"/>
+                                                        </then>
+                                                        <else>
+                                                            <output expression="&quot;OK &quot; &amp; DATABASENOME &amp; &quot; &quot; &amp; DATABASECOGNOME &amp; &quot; ritorna alla home per le alte opzioni&quot;" newline="True"/>
+                                                        </else>
+                                                    </if>
+                                                </then>
+                                                <else>
+                                                    <if expression="SCELTAMETODO == 4">
+                                                        <then>
+                                                            <output expression="&quot;GRAZIE &quot; &amp; DATABASENOME &amp; &quot; &quot; &amp; DATABASECOGNOME &amp; &quot; per aver contattato l'assistenza descrivici il problema&quot;" newline="True"/>
+                                                            <input variable="ASSISTENZA"/>
+                                                            <output expression="&quot;LE ARRIVERA PRESTO UNA CHIAMATA DA UN NOSTRO OPERATORE&quot;" newline="True"/>
+                                                        </then>
+                                                        <else/>
+                                                    </if>
+                                                </else>
+                                            </if>
+                                        </else>
+                                    </if>
+                                </else>
+                            </if>
+                        </then>
+                        <else>
+                            <output expression="&quot;VERIFICA DEL NOME NON RIUSCITA! Accesso negato.&quot;" newline="True"/>
+                        </else>
+                    </if>
+                </then>
+                <else>
+                    <output expression="&quot;TROPPE RICHIESTE EFFETTUATE. Account bloccato per sicurezza.&quot;" newline="True"/>
+                </else>
+            </if>
+        </body>
+    </function>
+</flowgorithm>
